@@ -1,10 +1,16 @@
 // Compile for Emscripten with
 //   emcc  -s USE_SDL=2 -o main.{html,c}
+// Compile for native with
+//   cc -o main{,.c} -I/usr/include/SDL2 -lSDL2 -lm
 
 #include <SDL.h>
 #include <SDL_render.h>
 
+#ifdef EMSCRIPTEN
 #include <emscripten.h>
+#else
+#include <unistd.h>               // usleep
+#endif
 
 #include <stdio.h>
 
@@ -92,6 +98,18 @@ void destroyTextures (int n, SDL_Texture** textures)
 
 //-----------------------------------------------------------------------------
 
+int continueMainLoop;
+
+void cancelMainLoop() { continueMainLoop = 0; }
+
+void mainLoop (void (*fn)(void *context), void *context, int sleepMs)
+{
+	for ( continueMainLoop = 1; continueMainLoop; usleep (1000 * sleepMs) )
+		(*fn)(context);
+}
+
+//-----------------------------------------------------------------------------
+
 void step (void *arg)
 {
 	context_t *ctx = arg;
@@ -132,7 +150,11 @@ void step (void *arg)
 		printf ("%6d: %8.2f, %8.2f\n", i, ctx->x[i], ctx->y[i]);
 
 		if ( ctx->x[i] < -100 || ctx->y[i] < -100 ) {
+#ifdef EMSCRIPTEN
 			emscripten_cancel_main_loop();
+#else
+			cancelMainLoop();
+#endif
 			destroyTextures (ctx->n, ctx->textures);
 			destroyContext (ctx);
 			SDL_Quit();
@@ -180,6 +202,10 @@ int main()
 	context.renderer = renderer;
 	createTextures (&context);
 
+#ifdef EMSCRIPTEN
 	emscripten_set_main_loop_arg (step, &context, -1, /* don't continue = */ 1);
 	printf ("We never get here.\n");
+#else
+	mainLoop (step, &context, 20);
+#endif
 }
