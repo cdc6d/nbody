@@ -4,6 +4,7 @@
 //   cc -o main{,.c} -I/usr/include/SDL2 -lSDL2 -lm
 
 #include <SDL.h>
+#include <SDL_events.h>
 #include <SDL_render.h>
 
 #ifdef EMSCRIPTEN
@@ -110,6 +111,21 @@ void mainLoop (void (*fn)(void *context), void *context, int sleepMs)
 
 //-----------------------------------------------------------------------------
 
+int userQuit()
+{
+	SDL_Event evt;
+	while ( SDL_PollEvent (&evt) ) {
+		printf ("Event type: %d\n", evt.type);
+		if ( evt.type == SDL_MOUSEBUTTONDOWN ) {
+			printf ("Mouse click!\n");
+			return 1;
+		}
+	}
+	return 0;
+}
+
+//-----------------------------------------------------------------------------
+
 void step (void *arg)
 {
 	context_t *ctx = arg;
@@ -150,7 +166,7 @@ void step (void *arg)
 		ctx->y[i] += ctx->vy[i];
 		printf ("%6d: %8.2f, %8.2f\n", i, ctx->x[i], ctx->y[i]);
 
-		if ( ctx->x[i] < -100 || ctx->y[i] < -100 ) {
+		if ( userQuit() || ctx->x[i] < -100 || ctx->y[i] < -100 ) {
 #ifdef EMSCRIPTEN
 			emscripten_cancel_main_loop();
 #else
