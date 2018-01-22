@@ -118,10 +118,11 @@ void step (void *arg)
 	SDL_RenderClear (ctx->renderer);
 	SDL_Rect dest;
 	for (int i = 0; i < ctx->n; ++i) {
-		dest.x = ctx->x[i];
-		dest.y = ctx->y[i];
-		dest.w = ctx->diam[i];
-		dest.h = ctx->diam[i];
+		const float r = ctx->diam[i] / 2;
+		dest.x = ctx->x[i] - r;
+		dest.y = ctx->y[i] - r;
+		dest.w = 2 * r;
+		dest.h = 2 * r;
 		SDL_RenderCopy (ctx->renderer, ctx->textures[i], NULL, &dest);
 	}
 	SDL_RenderPresent (ctx->renderer);
