@@ -99,6 +99,8 @@ void destroyTextures (int n, SDL_Texture** textures)
 
 //-----------------------------------------------------------------------------
 
+#ifndef EMSCRIPTEN
+
 int continueMainLoop;
 
 void cancelMainLoop() { continueMainLoop = 0; }
@@ -108,6 +110,8 @@ void mainLoop (void (*fn)(void *context), void *context, int sleepMs)
 	for ( continueMainLoop = 1; continueMainLoop; usleep (1000 * sleepMs) )
 		(*fn)(context);
 }
+
+#endif
 
 //-----------------------------------------------------------------------------
 
