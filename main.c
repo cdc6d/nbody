@@ -3,15 +3,21 @@
 // Compile for native with
 //   cc -o main{,.c} -I/usr/include/SDL2 -lSDL2 -lm
 
+// libSDL2
+
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_render.h>
+
+// Platform (Emscripten or POSIX)
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
 #else
 #include <unistd.h>               // usleep
 #endif
+
+// C Standard Library
 
 #include <stdio.h>
 
