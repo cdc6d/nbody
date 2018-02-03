@@ -75,11 +75,29 @@ void destroyContext (context_t *c)
 
 void drawBody (SDL_Renderer *renderer, int diam)
 {
-	SDL_Rect r;
-	r.x = 0; r.y = diam / 3; r.w = diam; r.h = diam / 3;
-	SDL_RenderFillRect (renderer, &r);
-	r.x = diam / 3; r.y = 0; r.w = diam / 3; r.h = diam;
-	SDL_RenderFillRect (renderer, &r);
+	const float
+		r = diam / 2.0f,  // Also the center x and y coord.
+		r2 = r * r;
+
+	for (int x = 0; x < diam; ++x) {	// So un-optimized!
+		const float
+			dx = x + 0.5f - r,
+			x2 = dx * dx;
+
+		for (int y = 0; y < diam; ++y) {
+			const float
+				dy = y + 0.5f - r,
+				d = sqrtf (x2 + dy * dy) - r,
+				scale =
+					d >  1.0f ? 0.0f :
+					d < -1.0f ? 1.0f :
+					(1.0f - d) / 2.0f;
+			const int rgb = 0.5f * scale * 255.0f;
+
+			SDL_SetRenderDrawColor (renderer, rgb, rgb, rgb, 0x7f);
+			SDL_RenderDrawPoint (renderer, x, y);
+		}
+	}
 }
 
 // Call this after setting diam[].
