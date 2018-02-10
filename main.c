@@ -13,8 +13,6 @@
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
-#else
-#include <unistd.h>               // usleep
 #endif
 
 // C Standard Library
@@ -131,7 +129,7 @@ void cancelMainLoop() { continueMainLoop = 0; }
 
 void mainLoop (void (*fn)(void *context), void *context, int sleepMs)
 {
-	for ( continueMainLoop = 1; continueMainLoop; usleep (1000 * sleepMs) )
+	for ( continueMainLoop = 1; continueMainLoop; SDL_Delay (sleepMs) )
 		(*fn)(context);
 }
 
