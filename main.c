@@ -191,19 +191,18 @@ void step (void *arg)
 		ctx->x[i] += ctx->vx[i];
 		ctx->y[i] += ctx->vy[i];
 		printf ("%6d: %8.2f, %8.2f\n", i, ctx->x[i], ctx->y[i]);
+	}
 
-		if ( userQuit() || ctx->x[i] < -100 || ctx->y[i] < -100 ) {
+	if ( userQuit() ) {
 #ifdef EMSCRIPTEN
-			emscripten_cancel_main_loop();
+		emscripten_cancel_main_loop();
 #else
-			cancelMainLoop();
+		cancelMainLoop();
 #endif
-			destroyTextures (ctx->n, ctx->textures);
-			destroyContext (ctx);
-			SDL_Quit();
-			printf ("Bye\n");
-			return;
-		}
+		destroyTextures (ctx->n, ctx->textures);
+		destroyContext (ctx);
+		SDL_Quit();
+		printf ("Bye\n");
 	}
 }
 
