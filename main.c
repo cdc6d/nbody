@@ -152,9 +152,8 @@ int userQuit()
 
 //-----------------------------------------------------------------------------
 
-void step (void *arg)
+void draw (context_t *ctx)
 {
-	context_t *ctx = arg;
 	SDL_SetRenderTarget (ctx->renderer, NULL);  // Render to window.
 	SDL_SetRenderDrawColor (ctx->renderer, 0x00, 0x00, 0x00, 0x00);
 	SDL_RenderClear (ctx->renderer);
@@ -168,7 +167,12 @@ void step (void *arg)
 		SDL_RenderCopy (ctx->renderer, ctx->textures[i], NULL, &dest);
 	}
 	SDL_RenderPresent (ctx->renderer);
+}
 
+//-----------------------------------------------------------------------------
+
+void physics (context_t *ctx)
+{
 	for (int i = 0; i < ctx->n; ++i) {
 		const int xi = ctx->x[i];
 		const int yi = ctx->y[i];
@@ -192,6 +196,17 @@ void step (void *arg)
 		ctx->y[i] += ctx->vy[i];
 		printf ("%6d: %8.2f, %8.2f\n", i, ctx->x[i], ctx->y[i]);
 	}
+}
+
+//-----------------------------------------------------------------------------
+
+void step (void *arg)
+{
+	context_t *ctx = arg;
+
+	draw (ctx);
+
+	physics (ctx);
 
 	if ( userQuit() ) {
 #ifdef EMSCRIPTEN
