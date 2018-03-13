@@ -153,7 +153,7 @@ int userInput()
 {
 	SDL_Event evt;
 	while ( SDL_PollEvent (&evt) ) {
-		printf ("Event type: %d\n", evt.type);
+		// printf ("Event type: %d\n", evt.type);
 		if ( evt.type == SDL_MOUSEBUTTONDOWN ) {
 			printf ("Mouse click!\n");
 			return USER_QUIT;
@@ -214,7 +214,7 @@ void physics (context_t *ctx)
 		}
 		ctx->x[i] += ctx->vx[i];
 		ctx->y[i] += ctx->vy[i];
-		printf ("%6d: %8.2f, %8.2f\n", i, ctx->x[i], ctx->y[i]);
+		// printf ("%6d: %8.2f, %8.2f\n", i, ctx->x[i], ctx->y[i]);
 	}
 }
 
