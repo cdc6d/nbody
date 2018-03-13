@@ -32,6 +32,7 @@ typedef struct {
 	float *diam;
 	SDL_Renderer *renderer;
 	SDL_Texture **textures;
+	int stepFrames;  // -1: keep running; 0: paused; N>0: step N frames.
 } context_t;
 
 void initContext (context_t *c, int n)
@@ -44,6 +45,7 @@ void initContext (context_t *c, int n)
 	c->diam     = malloc (n * sizeof(float));
 	c->renderer = 0;
 	c->textures = malloc (n * sizeof(SDL_Texture*));
+	c->stepFrames = -1;
 }
 
 void reinitContext (context_t *c, int n)
@@ -56,6 +58,7 @@ void reinitContext (context_t *c, int n)
 	c->diam     = realloc (c->diam    , n * sizeof(float));
 	// c->renderer = ...
 	c->textures = realloc (c->textures, n * sizeof(SDL_Texture*));
+	c->stepFrames = -1;
 }
 
 void destroyContext (context_t *c)
@@ -98,6 +101,8 @@ void drawBody (SDL_Renderer *renderer, int diam)
 	}
 }
 
+//-----------------------------------------------------------------------------
+
 // Call this after setting diam[].
 void createTextures (context_t *c)
 {
@@ -137,17 +142,32 @@ void mainLoop (void (*fn)(void *context), void *context, int sleepMs)
 
 //-----------------------------------------------------------------------------
 
-int userQuit()
+enum UserInput {
+	USER_LOVINIT,
+	USER_QUIT,
+	USER_TOGGLE_PAUSE,
+	USER_STEP,
+};
+
+int userInput()
 {
 	SDL_Event evt;
 	while ( SDL_PollEvent (&evt) ) {
 		printf ("Event type: %d\n", evt.type);
 		if ( evt.type == SDL_MOUSEBUTTONDOWN ) {
 			printf ("Mouse click!\n");
-			return 1;
+			return USER_QUIT;
+		}
+		if ( evt.type == SDL_KEYUP && evt.key.keysym.sym == SDLK_SPACE ) {
+			printf ("Space bar -> pause\n");
+			return USER_TOGGLE_PAUSE;
+		}
+		if ( evt.type == SDL_KEYUP && evt.key.keysym.sym == SDLK_s ) {
+			printf ("s -> step\n");
+			return USER_STEP;
 		}
 	}
-	return 0;
+	return USER_LOVINIT;
 }
 
 //-----------------------------------------------------------------------------
@@ -200,25 +220,60 @@ void physics (context_t *ctx)
 
 //-----------------------------------------------------------------------------
 
+void seeIfUserWantsSomething (context_t *ctx)
+{
+	switch (userInput()) {
+		case USER_QUIT: {
+#ifdef EMSCRIPTEN
+			emscripten_cancel_main_loop();
+#else
+			cancelMainLoop();
+#endif
+			destroyTextures (ctx->n, ctx->textures);
+			destroyContext (ctx);
+			SDL_Quit();
+			printf ("Bye\n");
+			break;
+		}
+		case USER_TOGGLE_PAUSE: {
+			if ( ctx->stepFrames == 0 )
+				// Paused -> running.
+				ctx->stepFrames = -1;
+			else
+				// Running or stepping -> paused.
+				ctx->stepFrames = 0;
+			break;
+		}
+		case USER_STEP: {
+			++ctx->stepFrames;
+			break;
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+
 void step (void *arg)
 {
 	context_t *ctx = arg;
 
-	draw (ctx);
+	if ( ctx->stepFrames != 0 ) {
+		// Not paused.
 
-	physics (ctx);
+		draw (ctx);
 
-	if ( userQuit() ) {
-#ifdef EMSCRIPTEN
-		emscripten_cancel_main_loop();
-#else
-		cancelMainLoop();
-#endif
-		destroyTextures (ctx->n, ctx->textures);
-		destroyContext (ctx);
-		SDL_Quit();
-		printf ("Bye\n");
+		physics (ctx);
+
+		if ( ctx->stepFrames > 0 ) {
+			// Step N frames.
+			--ctx->stepFrames;
+		}
+	} else  {
+		// Paused.  Give up CPU for a while and then loop.
+		SDL_Delay (10);
 	}
+
+	seeIfUserWantsSomething (ctx);
 }
 
 //-----------------------------------------------------------------------------
