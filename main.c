@@ -305,22 +305,22 @@ int main()
 	context_t context;
 	initContext (&context, N);
 
-	context.x   [0] = 10;
+	context.x   [0] = 100;
 	context.y   [0] = 10;
-	context.vx  [0] = 1.0f;
+	context.vx  [0] = 1.1f;
 	context.vy  [0] = 0;
 	context.diam[0] = 18;
 
 	context.x   [1] = 800;
 	context.y   [1] = 10;
 	context.vx  [1] = 0.05f;
-	context.vy  [1] = 0.4f;
+	context.vy  [1] = 0.7f;
 	context.diam[1] = 24;
 
-	context.x   [2] = 400;
-	context.y   [2] = 400;
-	context.vx  [2] = -1.0f;
-	context.vy  [2] = 0.3f;
+	context.x   [2] = 450;
+	context.y   [2] = 300;
+	context.vx  [2] = -0.4f;
+	context.vy  [2] = 0.1f;
 	context.diam[2] = 40;
 
 	context.renderer = renderer;
