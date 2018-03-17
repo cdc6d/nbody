@@ -196,17 +196,22 @@ void physics (context_t *ctx)
 	for (int i = 0; i < ctx->n; ++i) {
 		const int xi = ctx->x[i];
 		const int yi = ctx->y[i];
-		const int mi = ctx->diam[i] * ctx->diam[i];
+		const int di = ctx->diam[i];
+		const int mi = di * di;                  // Mass in a 2-D world.
 		for (int j = 0; j < ctx->n; ++j) {
 			if ( j == i ) continue;
 			const int xj = ctx->x[j];
 			const int yj = ctx->y[j];
-			const int mj = ctx->diam[j] * ctx->diam[j];
+			const int dj = ctx->diam[j];
+			const int mj = dj * dj;
 			const int dx = xj - xi;
 			const int dy = yj - yi;
 			const int r2 = dx * dx + dy * dy;
+			const float r = sqrtf (r2);
+			if ( r + 0.5f < (di + dj) / 2.0f ) {
+				printf ("%d and %d colliding!\n", i, j);
+			}
 			const float  force = G * mi * mj / r2;
-			const float      r = sqrtf (r2);
 			const float xforce = force / r * dx;
 			const float yforce = force / r * dy;
 			ctx->vx[i] += xforce;
