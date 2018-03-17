@@ -21,7 +21,7 @@
 
 //-----------------------------------------------------------------------------
 
-const float G = 0.0005f;
+const float G = 1.0f;
 
 //-----------------------------------------------------------------------------
 
@@ -193,13 +193,14 @@ void draw (context_t *ctx)
 
 void physics (context_t *ctx)
 {
+	// Update velocity of each body by applying the effects of
+	// gravitational force and any collisions.
 	for (int i = 0; i < ctx->n; ++i) {
 		const int xi = ctx->x[i];
 		const int yi = ctx->y[i];
 		const int di = ctx->diam[i];
 		const int mi = di * di;                  // Mass in a 2-D world.
-		for (int j = 0; j < ctx->n; ++j) {
-			if ( j == i ) continue;
+		for (int j = i + 1; j < ctx->n; ++j) {
 			const int xj = ctx->x[j];
 			const int yj = ctx->y[j];
 			const int dj = ctx->diam[j];
@@ -214,9 +215,15 @@ void physics (context_t *ctx)
 			const float  force = G * mi * mj / r2;
 			const float xforce = force / r * dx;
 			const float yforce = force / r * dy;
-			ctx->vx[i] += xforce;
-			ctx->vy[i] += yforce;
+			ctx->vx[i] += xforce / mi;
+			ctx->vy[i] += yforce / mi;
+			ctx->vx[j] -= xforce / mj;
+			ctx->vy[j] -= yforce / mj;
 		}
+	}
+
+	// Update position of each body using its new velocity.
+	for (int i = 0; i < ctx->n; ++i) {
 		ctx->x[i] += ctx->vx[i];
 		ctx->y[i] += ctx->vy[i];
 		// printf ("%6d: %8.2f, %8.2f\n", i, ctx->x[i], ctx->y[i]);
