@@ -196,25 +196,29 @@ void physics (context_t *ctx)
 	// Update velocity of each body by applying the effects of
 	// gravitational force and any collisions.
 	for (int i = 0; i < ctx->n; ++i) {
-		const int xi = ctx->x[i];
-		const int yi = ctx->y[i];
-		const int di = ctx->diam[i];
-		const int mi = di * di;                  // Mass in a 2-D world.
+		const float
+			  xi = ctx->x[i]
+			, yi = ctx->y[i]
+			, di = ctx->diam[i]
+			, mi = di * di                  // Mass in a 2-D world.
+			;
 		for (int j = i + 1; j < ctx->n; ++j) {
-			const int xj = ctx->x[j];
-			const int yj = ctx->y[j];
-			const int dj = ctx->diam[j];
-			const int mj = dj * dj;
-			const int dx = xj - xi;
-			const int dy = yj - yi;
-			const int r2 = dx * dx + dy * dy;
-			const float r = sqrtf (r2);
+			const float
+				  xj = ctx->x[j]
+				, yj = ctx->y[j]
+				, dj = ctx->diam[j]
+				, mj = dj * dj
+				, dx = xj - xi
+				, dy = yj - yi
+				, r2 = dx * dx + dy * dy
+				, r = sqrtf (r2)
+				,  force = G * mi * mj / r2
+				, xforce = force / r * dx
+				, yforce = force / r * dy
+				;
 			if ( r + 0.5f < (di + dj) / 2.0f ) {
 				printf ("%d and %d colliding!\n", i, j);
 			}
-			const float  force = G * mi * mj / r2;
-			const float xforce = force / r * dx;
-			const float yforce = force / r * dy;
 			ctx->vx[i] += xforce / mi;
 			ctx->vy[i] += yforce / mi;
 			ctx->vx[j] -= xforce / mj;
