@@ -204,6 +204,15 @@ void draw (context_t *ctx)
 
 //-----------------------------------------------------------------------------
 
+// Calculate new velocities after collision given the (x, y) separation
+// between two bodies and their velocities before collision.
+
+void doCollision (
+	float dx, float dy, float r,
+	float *vxi, float *vyi, float *vxj, float *vyj)
+{
+}
+
 void physics (context_t *ctx)
 {
 	// Update velocity of each body by applying the effects of
@@ -229,13 +238,20 @@ void physics (context_t *ctx)
 				, xforce = force / r * dx
 				, yforce = force / r * dy
 				;
+			float
+				  *vxi = &(ctx->vx[i])
+				, *vyi = &(ctx->vy[i])
+				, *vxj = &(ctx->vx[j])
+				, *vyj = &(ctx->vy[j])
+				;
 			if ( r + 0.5f < (di + dj) / 2.0f ) {
 				printf ("%d and %d colliding!\n", i, j);
+				doCollision (dx, dy, r, vxi, vyi, vxj, vyj);
 			}
-			ctx->vx[i] += xforce / mi;
-			ctx->vy[i] += yforce / mi;
-			ctx->vx[j] -= xforce / mj;
-			ctx->vy[j] -= yforce / mj;
+			*vxi += xforce / mi;
+			*vyi += yforce / mi;
+			*vxj -= xforce / mj;
+			*vyj -= yforce / mj;
 		}
 	}
 
