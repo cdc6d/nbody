@@ -152,22 +152,35 @@ enum UserInput {
 int userInput()
 {
 	SDL_Event evt;
+	int ret = USER_LOVINIT;
 	while ( SDL_PollEvent (&evt) ) {
 		// printf ("Event type: %d\n", evt.type);
-		if ( evt.type == SDL_MOUSEBUTTONDOWN ) {
-			printf ("Mouse click!\n");
-			return USER_QUIT;
-		}
-		if ( evt.type == SDL_KEYUP && evt.key.keysym.sym == SDLK_SPACE ) {
-			printf ("Space bar -> pause\n");
-			return USER_TOGGLE_PAUSE;
-		}
-		if ( evt.type == SDL_KEYUP && evt.key.keysym.sym == SDLK_s ) {
-			printf ("s -> step\n");
-			return USER_STEP;
+		switch ( evt.type ) {
+			case SDL_MOUSEBUTTONDOWN: {
+				printf ("Mouse click!\n");
+				ret = USER_QUIT;
+				break;
+			}
+			case SDL_KEYUP: {
+				switch ( evt.key.keysym.sym ) {
+					case SDLK_SPACE:
+						printf ("Space bar -> pause\n");
+						ret = USER_TOGGLE_PAUSE;
+						break;
+					case SDLK_s:
+						printf ("s -> step\n");
+						ret = USER_STEP;
+						break;
+					case SDLK_q:
+						printf ("q -> quit\n");
+						ret = USER_QUIT;
+						break;
+				}
+				break;
+			}
 		}
 	}
-	return USER_LOVINIT;
+	return ret;
 }
 
 //-----------------------------------------------------------------------------
