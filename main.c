@@ -247,7 +247,7 @@ void physics (context_t *ctx)
 
 			// Collision Handling
 
-			if ( r + 0.5f < (di + dj) / 2.0f ) {
+			if ( r < (di + dj) / 2.0f ) {
 				printf ("%d and %d colliding!\n", i, j);
 				doCollision (dx, dy, r, vxi, vyi, vxj, vyj);
 			}
