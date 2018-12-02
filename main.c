@@ -235,8 +235,8 @@ void physics (context_t *ctx)
 				, r2 = dx * dx + dy * dy
 				, r = sqrtf (r2)
 				,  force = G * mi * mj / r2
-				, xforce = force / r * dx
-				, yforce = force / r * dy
+				, xforce = force / r * dx    // Resolve using
+				, yforce = force / r * dy    // triangle similarity.
 				;
 			float
 				  *vxi = &(ctx->vx[i])
@@ -244,10 +244,16 @@ void physics (context_t *ctx)
 				, *vxj = &(ctx->vx[j])
 				, *vyj = &(ctx->vy[j])
 				;
+
+			// Collision Handling
+
 			if ( r + 0.5f < (di + dj) / 2.0f ) {
 				printf ("%d and %d colliding!\n", i, j);
 				doCollision (dx, dy, r, vxi, vyi, vxj, vyj);
 			}
+
+			// Gravitational Impulse
+
 			*vxi += xforce / mi;
 			*vyi += yforce / mi;
 			*vxj -= xforce / mj;
