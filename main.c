@@ -247,8 +247,12 @@ void physics (context_t *ctx)
 
 			// Collision Handling
 
-			if ( r < (di + dj) / 2.0f ) {
-				printf ("%d and %d colliding!\n", i, j);
+			const float minSep = (di + dj) / 2.0f;
+			if ( r <= minSep ) {
+
+				printf ("%d and %d colliding! r=%f minSep=%f\n",
+				          i,     j,           r,   minSep);
+
 				doCollision (dx, dy, r, vxi, vyi, vxj, vyj);
 			}
 
