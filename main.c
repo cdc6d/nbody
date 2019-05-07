@@ -1,8 +1,3 @@
-// Compile for Emscripten with
-//   emcc  -s USE_SDL=2 -o main.{html,c}
-// Compile for native with
-//   cc -o main{,.c} -I/usr/include/SDL2 -lSDL2 -lm
-
 // libSDL2
 
 #include <SDL.h>
