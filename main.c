@@ -185,6 +185,10 @@ int userInput()
 
 //-----------------------------------------------------------------------------
 
+// Draw each body directly to the screen with no coordinate translation.
+// This creates a flat Cartesian upside-down mirror world where the positive
+// X direction goes to the right and the positive Y direction goes down.
+
 void draw (context_t *ctx)
 {
 	SDL_SetRenderTarget (ctx->renderer, NULL);  // Render to window.
