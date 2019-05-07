@@ -208,13 +208,100 @@ void draw (context_t *ctx)
 
 //-----------------------------------------------------------------------------
 
+float dot (float x1, float y1, float x2, float y2)
+{
+	return x1 * x2 + y1 * y2;
+}
+
+// Return the length of the projection of (x1, y1) onto (x2, y2)
+// which has length r2 (so we don't have to recompute it).
+
+float scalarProject (float x1, float y1, float x2, float y2, float r2)
+{
+	return dot (x1, y1, x2, y2) / r2;
+}
+
+float norm (float x, float y)
+{
+	return sqrtf (x*x + y*y);
+}
+
 // Calculate new velocities after collision given the (x, y) separation
 // between two bodies and their velocities before collision.
+//
+// (dx, dy) is the "separation vector" from body i to body j.
+// r is the length of this vector (so we don't have to recompute it).
+//
+// Let the "normal speed" be the bodies' relative speed along the
+// separation vector.  Normal speed > 0 means the bodies are approaching
+// each other.  Otherwise, we probably already handled this collision
+// and the bodies just haven't had time to escape from one another
+// (or they never will).
+//
+// We handle the collision by absorbing all the normal motion and
+// preserving all the tangent motion.  The normal motion that is
+// lost is thus converted into heat.
+//
+// Return the normal speed before collision handling
+// (which will be positive if energy was absorbed).
 
-void doCollision (
+float doCollision (
 	float dx, float dy, float r,
 	float *vxi, float *vyi, float *vxj, float *vyj)
 {
+	// 1. Project velocities onto separation vector to get normal speeds.
+	// 2. If the normal speed <= 0, stop: there is no energy to absorb.
+
+	const float
+		  vni = scalarProject (*vxi, *vyi, dx,  dy, r)
+		, vnj = scalarProject (*vxj, *vyj, dx,  dy, r)
+		, vn  = vni - vnj   // i's normal speed toward j
+		;
+
+	if ( vn <= 0 ) {
+		printf ("Overlapping bodies already separating: vn=%f\n", vn);
+		return vn;
+	}
+
+	printf ("Collision: dx=%f dy=%f r=%f vni=%f vnj=%f vn=%f\n",
+	                    dx,   dy,   r,   vni,   vnj,   vn);
+
+	// Rotate the separation vector right 90 degrees to yield the
+	// tangent vector (-dy, dx).  (Remember, upside-down mirror world!)
+	//
+	// 3. Project velocities onto tangent vector to get tangent speeds.
+	// 4. Simulate a partially elastic collision by absorbing all the
+	//    normal speed and preserving all the tangent speed.
+	//    I don't know how realistic this is... let's see!
+
+	const float
+		  vti = scalarProject (*vxi, *vyi, -dy, dx, r)
+		, vtj = scalarProject (*vxj, *vyj, -dy, dx, r)
+		;
+
+	{
+		const float vi = norm (*vxi, *vyi),
+		            vj = norm (*vxj, *vyj);
+		printf ("Old: vxi=%f vyi=%f vi=%f vxj=%f vyj=%f vj=%f vti=%f vtj=%f\n",
+		             *vxi,  *vyi,   vi,  *vxj,  *vyj,   vj,   vti,   vtj);
+	}
+
+	// Resolve tangent speed into components of tangent vector (-dy, dx)
+	// using triangle similarity.  (vx:dy, vy:dx, vt:r)
+
+	*vxi = vti / r * -dy;
+	*vyi = vti / r *  dx;
+	*vxj = vtj / r * -dy;
+	*vyj = vtj / r *  dx;
+
+	{
+		const float vi = norm (*vxi, *vyi),
+		            vj = norm (*vxj, *vyj);
+		printf ("New: vxi=%f vyi=%f vi=%f vxj=%f vyj=%f vj=%f\n",
+		             *vxi,  *vyi,   vi,  *vxj,  *vyj,   vj);
+	}
+
+	return vn;
 }
 
 void physics (context_t *ctx)
@@ -257,15 +344,21 @@ void physics (context_t *ctx)
 				printf ("%d and %d colliding! r=%f minSep=%f\n",
 				          i,     j,           r,   minSep);
 
-				doCollision (dx, dy, r, vxi, vyi, vxj, vyj);
+				const float dv = doCollision (dx, dy, r, vxi, vyi, vxj, vyj);
+				if ( dv > 0.f ) {
+					// TODO: handle heat gain.
+					printf ("%d and %d absorb %f units of heat\n",
+					          i,     j,     dv * dv);
+				}
+			} else {
+
+				// Gravitational Impulse
+
+				*vxi += xforce / mi;
+				*vyi += yforce / mi;
+				*vxj -= xforce / mj;
+				*vyj -= yforce / mj;
 			}
-
-			// Gravitational Impulse
-
-			*vxi += xforce / mi;
-			*vyi += yforce / mi;
-			*vxj -= xforce / mj;
-			*vyj -= yforce / mj;
 		}
 	}
 
