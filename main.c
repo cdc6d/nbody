@@ -107,7 +107,6 @@ void createTextures (context_t *c)
 			SDL_TEXTUREACCESS_TARGET, c->diam[i], c->diam[i]);
 
 		SDL_SetRenderTarget (c->renderer, texture);
-		SDL_SetRenderDrawColor (c->renderer, 0xc0, 0xc0, 0xc0, 0xc0);
 		drawBody (c->renderer, c->diam[i]);
 		c->textures[i] = texture;
 	}
@@ -187,7 +186,6 @@ int userInput()
 void draw (context_t *ctx)
 {
 	SDL_SetRenderTarget (ctx->renderer, NULL);  // Render to window.
-	SDL_SetRenderDrawColor (ctx->renderer, 0x00, 0x00, 0x00, 0x00);
 	SDL_RenderClear (ctx->renderer);
 	SDL_Rect dest;
 	for (int i = 0; i < ctx->n; ++i) {
