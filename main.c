@@ -90,7 +90,7 @@ void drawBody (SDL_Renderer *renderer, int diam)
 					(1.0f - d) / 2.0f;
 			const int rgb = 0.5f * scale * 255.0f;
 
-			SDL_SetRenderDrawColor (renderer, rgb, rgb, rgb, 0x7f);
+			SDL_SetRenderDrawColor (renderer, rgb, rgb, rgb, 0xa0);
 			SDL_RenderDrawPoint (renderer, x, y);
 		}
 	}
@@ -106,6 +106,7 @@ void createTextures (context_t *c)
 			c->renderer, SDL_PIXELFORMAT_RGBA8888,
 			SDL_TEXTUREACCESS_TARGET, c->diam[i], c->diam[i]);
 
+		SDL_SetTextureBlendMode (texture, SDL_BLENDMODE_ADD);
 		SDL_SetRenderTarget (c->renderer, texture);
 		drawBody (c->renderer, c->diam[i]);
 		c->textures[i] = texture;
